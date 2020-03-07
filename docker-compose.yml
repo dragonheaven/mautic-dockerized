@@ -1,0 +1,52 @@
+version: '2'
+
+services:
+
+  mauticdb:
+    image: percona/percona-server:5.7
+    container_name: mauticdb
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysecret
+    command:
+      --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+    networks:
+      - mautic-net
+
+  cloudcom:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cloudcom
+    container_name: cloudcom
+    links:
+      - mauticdb:mysql
+    depends_on:
+      - mauticdb
+    ports:
+      - 8080:80
+    volumes:
+      - ./plugins:/var/www/html/plugins
+    environment:
+      - MAUTIC_ENV=dev
+      - MAUTIC_DB_HOST=mauticdb
+      - MYSQL_PORT_3306_TCP=3306
+      - MAUTIC_DB_USER=root
+      - MAUTIC_DB_PASSWORD=mysecret
+      - MAUTIC_DB_NAME=mautic
+      - MAUTIC_RUN_CRON_JOBS=true
+    networks:
+      - mautic-net
+#    command: bash -c "composer install && ./common/docker-entrypoint.sh && apache2-foreground"
+
+volumes:
+  mysql_data:
+    driver: local
+  mautic_data:
+    driver: local
+networks:
+  mautic-net:
+    driver: bridge
