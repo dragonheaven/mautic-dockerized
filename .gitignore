@@ -4,6 +4,7 @@
 !.gitkeep
 .php_cs.cache
 /.env
+!/.env.dist
 /composer.phar
 
 /app/bootstrap*
@@ -93,4 +94,3 @@
 !/themes/blank.png
 !/themes/blank-big.png
 
-/translations
